@@ -1,11 +1,11 @@
 import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
 
 export default function Home() {
   return (
     <main className="min-h-screen">
       <Navbar />
-      {/* Temporary dark section to see nav text */}
-      <section className="h-screen bg-gray-mid" />
+      <HeroSection />
     </main>
   );
 }
