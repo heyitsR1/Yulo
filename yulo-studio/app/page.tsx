@@ -1,9 +1,11 @@
+import Navbar from "@/components/Navbar";
+
 export default function Home() {
   return (
     <main className="min-h-screen">
-      <p className="p-10 text-text-muted text-lg font-bold">
-        Yulo Studio — scaffold ready
-      </p>
+      <Navbar />
+      {/* Temporary dark section to see nav text */}
+      <section className="h-screen bg-gray-mid" />
     </main>
   );
 }
