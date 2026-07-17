@@ -24,9 +24,9 @@ export default function WorkCTA() {
       // Giant background word slides sideways with scroll
       gsap.fromTo(
         ".work-bg-word",
-        { xPercent: 6 },
+        { xPercent: 12 },
         {
-          xPercent: -12,
+          xPercent: -22,
           ease: "none",
           scrollTrigger: {
             trigger: root,

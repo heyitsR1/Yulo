@@ -95,7 +95,7 @@ export default function Navbar() {
         </a>
       </div>
 
-      <div className="flex items-center gap-[6px]">
+      <div className="hidden items-center gap-[6px] md:flex">
         {nav.social.map((link) => (
           <a
             key={link.label}
