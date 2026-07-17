@@ -1,15 +1,43 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { siteContent } from "@/data/content";
 
 const { clickScroll } = siteContent;
 
+const SHAPES_TRAVEL_PX = 1500;
+
 export default function ClickScrollSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    function onScroll() {
+      const el = sectionRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const scrollable = rect.height - window.innerHeight;
+      if (scrollable <= 0) {
+        setProgress(0);
+        return;
+      }
+      const p = Math.min(1, Math.max(0, -rect.top / scrollable));
+      setProgress(p);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
-    <section className="relative w-full bg-bg-warm">
+    <section ref={sectionRef} className="relative w-full bg-bg-warm">
       <div className="md:h-[2246px] overflow-clip pt-[100px] md:pt-[250px]">
-        <div className="sticky top-0 mx-auto w-[90vw] md:w-[960px]">
+        <div className="sticky top-0 mx-auto w-[90vw] md:w-[960px] z-10">
           <div className="relative">
             <h2 className="text-text-muted text-[40px] md:text-[80px] xl:text-[136.6px] font-bold leading-[1.15] md:leading-[157.65px] tracking-[-2px] md:tracking-[-6.72px]">
               <span className="block">{clickScroll.line1}</span>
@@ -33,7 +61,10 @@ export default function ClickScrollSection() {
         </div>
 
         {/* Floating shapes — hidden on mobile */}
-        <div className="hidden md:block relative w-full h-[1174px] mt-[-200px]">
+        <div
+          className="hidden md:block relative w-full h-[1174px] mt-[-200px] z-0 will-change-transform"
+          style={{ transform: `translateX(${-progress * SHAPES_TRAVEL_PX}px)` }}
+        >
           <div className="absolute left-[165px] -top-[363px] w-[1102px] h-[1102px] rotate-[59.82deg]">
             <Image src="/images/shapes/big-circle-scroll1.png" alt="" fill className="object-contain" />
           </div>

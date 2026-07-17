@@ -7,6 +7,7 @@
   --blue: #2E54FE;
   --text-muted: #96908C;
   --gray-mid: #A8A6A5;
+  --text-heading: #4A3F33;
 }
 
 @theme inline {
@@ -16,6 +17,7 @@
   --color-blue: #2E54FE;
   --color-text-muted: #96908C;
   --color-gray-mid: #A8A6A5;
+  --color-text-heading: #4A3F33;
 
   --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
 

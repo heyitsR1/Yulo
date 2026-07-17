@@ -18,16 +18,9 @@ export default function ServicesSection() {
         </h2>
       </div>
 
-      <div className="mt-[100px] md:mt-[333px] flex flex-col gap-16 md:gap-0">
+      <div className="mt-[100px] md:mt-[200px] flex flex-col gap-16 md:gap-[140px]">
         {services.items.map((service, i) => (
-          <div
-            key={i}
-            className={`flex flex-col items-center justify-end ${
-              i === services.items.length - 1
-                ? "md:h-[638px]"
-                : "md:h-[883px]"
-            }`}
-          >
+          <div key={i} className="flex flex-col items-center justify-center">
             <ServiceCard
               title={service.title}
               description={service.description}
