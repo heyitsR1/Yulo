@@ -1,41 +1,106 @@
 @import "tailwindcss";
 
 :root {
-  --bg-warm: #FAF6EF;
-  --peach: #FFBC95;
-  --peach-warm: #FAB68E;
-  --blue: #2E54FE;
-  --text-muted: #96908C;
-  --gray-mid: #A8A6A5;
-  --text-heading: #4A3F33;
+  /* Palette lifted from the reference design tokens */
+  --bg-warm: #faf6ef;
+  --bg-grey: #f4f4f4;
+  --bg-cold: #e8e9ef;
+  --orange1: #ffbc95;
+  --orange2: #f99e76;
+  --blue: #2e54fe;
+  --grey: #96908c;
+  --grey-dark: #757068;
+  --loader-grey: #98908b;
+  --text-dark: #333333;
 }
 
 @theme inline {
-  --color-bg-warm: #FAF6EF;
-  --color-peach: #FFBC95;
-  --color-peach-warm: #FAB68E;
-  --color-blue: #2E54FE;
-  --color-text-muted: #96908C;
-  --color-gray-mid: #A8A6A5;
-  --color-text-heading: #4A3F33;
+  --color-bg-warm: #faf6ef;
+  --color-bg-grey: #f4f4f4;
+  --color-bg-cold: #e8e9ef;
+  --color-peach: #ffbc95;
+  --color-peach-deep: #f99e76;
+  --color-blue: #2e54fe;
+  --color-grey: #96908c;
+  --color-grey-dark: #757068;
+  --color-text-dark: #333333;
 
-  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-sans: var(--font-figtree), Arial, sans-serif;
+  --font-condensed: var(--font-six-caps), sans-serif;
+  --font-display: var(--font-shrikhand), serif;
 
-  --spacing-page-x: 76.8px;
-
-  --max-width-content: 1766px;
-
+  --spacing-page-x: 4vw;
   --radius-pill: 90px;
-  --radius-card: 96px;
 }
 
 html {
-  scroll-behavior: smooth;
+  background: var(--bg-warm);
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
 
 body {
   background-color: var(--bg-warm);
-  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
-  color: var(--text-muted);
-  overflow-x: hidden;
+  font-family: var(--font-figtree), Arial, sans-serif;
+  color: var(--grey);
+  overflow-x: clip;
+  font-weight: 600;
+}
+
+/* Subtle film-grain overlay used over large photography */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* Blinking text-caret bars used beside the “scroll” word */
+@keyframes caret-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  95% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.caret-blink {
+  animation: caret-blink 1.1s steps(1) infinite;
+}
+
+/* Loader wordmark pulse */
+@keyframes loader-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.loader-pulse {
+  animation: loader-pulse 1.6s ease-in-out infinite;
+}
+
+::selection {
+  background: var(--orange1);
+  color: #fff;
 }

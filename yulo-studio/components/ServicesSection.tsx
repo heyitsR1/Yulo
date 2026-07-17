@@ -1,32 +1,53 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { gsap } from "@/lib/gsap";
 import { siteContent } from "@/data/content";
-import ServiceCard from "./ServiceCard";
+import ServiceBlock from "./ServiceBlock";
 
 const { services } = siteContent;
 
 export default function ServicesSection() {
+  const rootRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const ctx = gsap.context(() => {
+      // Two-tone headline fades up as it enters
+      gsap.from(".svc-headline > *", {
+        yPercent: 40,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: { trigger: root, start: "top 70%" },
+      });
+    }, root);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="services" className="relative w-full bg-bg-warm">
-      <div className="px-6 md:px-page-x">
-        <p className="text-text-muted text-base md:text-[20px] font-bold leading-5">
+    <section
+      id="services"
+      ref={rootRef}
+      className="relative w-full bg-bg-warm pt-[10vw]"
+    >
+      <div className="px-[4vw]">
+        <p className="text-[clamp(14px,1.25vw,20px)] font-semibold text-grey">
           {services.label}
         </p>
-        <h2 className="mt-4 md:mt-[19px] text-[40px] md:text-[80px] xl:text-[156.5px] font-bold leading-[1] md:leading-[146.88px] tracking-[-2px] md:tracking-[-7.68px]">
-          <span className="text-text-muted">
-            We help companies to succeed on projects{" "}
-          </span>
-          <span className="text-peach-warm">like:</span>
+        <h2 className="svc-headline mt-[1vw] text-[8.2vw] leading-[0.98] font-semibold tracking-[-0.05em]">
+          <span className="text-grey-dark/70">{services.headlinePlain} </span>
+          <span className="text-peach">{services.headlineAccent}</span>
         </h2>
       </div>
 
-      <div className="mt-[100px] md:mt-[200px] flex flex-col gap-16 md:gap-[140px]">
+      <div className="mt-[18vw] flex flex-col gap-[6vw]">
         {services.items.map((service, i) => (
-          <div key={i} className="flex flex-col items-center justify-center">
-            <ServiceCard
-              title={service.title}
-              description={service.description}
-              images={service.images}
-            />
-          </div>
+          <ServiceBlock key={i} index={i} {...service} />
         ))}
       </div>
     </section>

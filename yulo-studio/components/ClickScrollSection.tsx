@@ -1,104 +1,141 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { gsap, SplitText } from "@/lib/gsap";
 import { siteContent } from "@/data/content";
 
 const { clickScroll } = siteContent;
 
-const SHAPES_TRAVEL_PX = 1500;
+/** Floating shape definitions: image, position, size, parallax speed */
+const SHAPES = [
+  { src: "/images/shapes/big-circle-scroll1.png", cls: "left-[-13vw] top-[2vw] w-[42vw]", speed: -3, rot: 0 },
+  { src: "/images/shapes/big-pill-scroll1.png", cls: "left-[19vw] top-[9vw] w-[28vw]", speed: -7, rot: 0 },
+  { src: "/images/shapes/big-circle-scroll2.png", cls: "left-[35vw] top-[21vw] w-[34vw]", speed: -5, rot: 0 },
+  { src: "/images/shapes/big-hexagon-scroll1.png", cls: "left-[69vw] top-[1vw] w-[32vw]", speed: -9, rot: 0 },
+  { src: "/images/shapes/big-circle-scroll3.png", cls: "left-[72vw] top-[36vw] w-[18vw]", speed: -13, rot: 0 },
+  { src: "/images/shapes/big-square-scroll1.png", cls: "left-[18.5vw] top-[35vw] w-[19vw]", speed: -11, rot: 0 },
+];
+
+const ACCENTS = [
+  { cls: "left-[60.5vw] top-[13vw] h-[2.7vw] w-[4.7vw] rounded-full", speed: -15 },
+  { cls: "left-[20vw] top-[31.5vw] h-[3vw] w-[3vw] rounded-full", speed: -8 },
+  {
+    cls: "left-[69vw] top-[42vw] h-[2.4vw] w-[2.4vw] [clip-path:polygon(50%_0,100%_38%,82%_100%,18%_100%,0_38%)]",
+    speed: -18,
+  },
+];
 
 export default function ClickScrollSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const [progress, setProgress] = useState(0);
+  const rootRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    function onScroll() {
-      const el = sectionRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const scrollable = rect.height - window.innerHeight;
-      if (scrollable <= 0) {
-        setProgress(0);
-        return;
-      }
-      const p = Math.min(1, Math.max(0, -rect.top / scrollable));
-      setProgress(p);
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
+    const root = rootRef.current;
+    if (!root) return;
+
+    const ctx = gsap.context(() => {
+      // Heading lines rise in as the section enters
+      const split = new SplitText(".cs-heading", { type: "lines" });
+      gsap.from(split.lines, {
+        yPercent: 60,
+        opacity: 0,
+        stagger: 0.1,
+        duration: 0.9,
+        ease: "power3.out",
+        scrollTrigger: { trigger: root, start: "top 65%" },
+      });
+
+      gsap.from(".cs-pill", {
+        scaleX: 0,
+        transformOrigin: "left center",
+        duration: 0.7,
+        ease: "power3.inOut",
+        scrollTrigger: { trigger: root, start: "top 55%" },
+      });
+
+      // Shape field parallax — each drifts upward at its own rate
+      root.querySelectorAll<HTMLElement>("[data-speed]").forEach((el) => {
+        const speed = Number(el.dataset.speed);
+        gsap.to(el, {
+          y: `${speed}vw`,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".cs-shapes",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      });
+    }, root);
+
+    return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative w-full bg-bg-warm">
-      <div className="md:h-[2246px] overflow-clip pt-[100px] md:pt-[250px]">
-        <div className="sticky top-0 mx-auto w-[90vw] md:w-[960px] z-10">
-          <div className="relative">
-            <h2 className="text-text-muted text-[40px] md:text-[80px] xl:text-[136.6px] font-bold leading-[1.15] md:leading-[157.65px] tracking-[-2px] md:tracking-[-6.72px]">
-              <span className="block">{clickScroll.line1}</span>
-              <span className="block">{clickScroll.line2}</span>
-              <span className="block relative">
-                <span className="relative inline-block">
-                  <span className="absolute -left-3 md:-left-[42px] top-1/2 -translate-y-1/2 w-[120px] md:w-[384px] h-[50px] md:h-[163px] bg-peach rounded-full" />
-                  <span className="relative z-10 text-bg-warm">
-                    {clickScroll.line3_pre}
-                  </span>
-                </span>
-                <span className="text-text-muted">
-                  {"   "}
-                  {clickScroll.line3_mid}{" "}
-                </span>
-                <span className="text-peach">{clickScroll.line3_post}</span>
+    <section ref={rootRef} className="relative w-full overflow-clip bg-bg-warm">
+      <div className="mx-auto w-fit pt-[16vw] pb-[6vw]">
+        <h2 className="cs-heading text-[8.9vw] leading-[1.06] font-semibold tracking-[-0.045em] text-[#b3a89d]">
+          <span className="block pl-[0.5vw]">{clickScroll.line1}</span>
+          <span className="block">{clickScroll.line2}</span>
+          <span className="block">
+            <span className="relative mr-[2.2vw] inline-block px-[3vw]">
+              <span className="cs-pill absolute inset-0 rounded-full bg-peach" />
+              <span className="relative z-10 text-bg-warm">
+                {clickScroll.click}
               </span>
-              <span className="block">{clickScroll.line4}</span>
-            </h2>
-          </div>
-        </div>
+            </span>
+            <span>{clickScroll.mid} </span>
+            <span className="text-[#f5b48d]">{clickScroll.scroll}</span>
+            <span className="caret-blink ml-[1.2vw] inline-flex translate-y-[0.6vw] gap-[0.6vw]">
+              <span className="inline-block h-[6.2vw] w-[0.5vw] rounded-full bg-peach" />
+              <span className="inline-block h-[6.2vw] w-[0.5vw] rounded-full bg-peach" />
+            </span>
+          </span>
+          <span className="block">{clickScroll.line4}</span>
+        </h2>
+      </div>
 
-        {/* Floating shapes — hidden on mobile */}
-        <div
-          className="hidden md:block relative w-full h-[1174px] mt-[-200px] z-0 will-change-transform"
-          style={{ transform: `translateX(${-progress * SHAPES_TRAVEL_PX}px)` }}
+      {/* Floating 3D shape field */}
+      <div className="cs-shapes relative h-[58vw] w-full">
+        {SHAPES.map((s) => (
+          <div
+            key={s.src}
+            data-speed={s.speed}
+            className={`absolute ${s.cls}`}
+            style={{ rotate: `${s.rot}deg` }}
+          >
+            <Image
+              src={s.src}
+              alt=""
+              width={900}
+              height={900}
+              className="h-auto w-full object-contain"
+            />
+          </div>
+        ))}
+        {ACCENTS.map((a, i) => (
+          <div
+            key={i}
+            data-speed={a.speed}
+            className={`absolute bg-blue ${a.cls}`}
+          />
+        ))}
+
+        {/* Cream rope curve weaving through the field */}
+        <svg
+          data-speed={-12}
+          className="absolute left-[55vw] top-[-4vw] h-[52vw] w-[26vw]"
+          viewBox="0 0 400 800"
+          fill="none"
         >
-          <div className="absolute left-[165px] -top-[363px] w-[1102px] h-[1102px] rotate-[59.82deg]">
-            <Image src="/images/shapes/big-circle-scroll1.png" alt="" fill className="object-contain" />
-          </div>
-          <div className="absolute left-[403px] top-[241px] w-[499px] h-[434px]">
-            <Image src="/images/shapes/big-pill-scroll1.png" alt="" fill className="object-contain" />
-          </div>
-          <div className="absolute left-[1136px] top-[264px] w-[892px] h-[892px] rotate-[59.82deg]">
-            <Image src="/images/shapes/big-circle-scroll2.png" alt="" fill className="object-contain" />
-          </div>
-          <div className="absolute left-[1782px] -top-[217px] w-[1069px] h-[1038px] rotate-[59.95deg]">
-            <Image src="/images/shapes/big-hexagon-scroll1.png" alt="" fill className="object-contain" />
-          </div>
-          <div className="absolute left-[1695px] top-[485px] w-[401px] h-[401px] rotate-[79.93deg]">
-            <Image src="/images/shapes/big-circle-scroll3.png" alt="" fill className="object-contain" />
-          </div>
-          <div className="absolute left-[365px] top-[647px] w-[384px] h-[338px]">
-            <Image src="/images/shapes/big-square-scroll1.png" alt="" fill className="object-contain" />
-          </div>
-          <div className="absolute left-[417px] top-[510px] w-[79px] h-[79px]">
-            <svg viewBox="0 0 58 58" fill="none" className="w-full h-full rotate-[59.82deg]">
-              <circle cx="29" cy="29" r="29" fill="#2E54FE" />
-            </svg>
-          </div>
-          <div className="absolute left-[1224px] top-[83px] w-[95px] h-[110px]">
-            <svg viewBox="0 0 96 54" fill="none" className="w-full h-full rotate-[59.82deg]">
-              <rect x="0" y="0" width="96" height="54" rx="27" fill="#2E54FE" />
-            </svg>
-          </div>
-          <div className="absolute left-[1355px] top-[658px] w-[54px] h-[53px]">
-            <svg viewBox="0 0 54 53" fill="none" className="w-full h-full rotate-[59.82deg]">
-              <polygon points="27,0 51,13 51,40 27,53 3,40 3,13" fill="#2E54FE" />
-            </svg>
-          </div>
-        </div>
+          <path
+            d="M300 -40 C 420 160, 180 300, 240 460 C 285 580, 180 660, 120 700"
+            stroke="#f5e9dc"
+            strokeWidth="14"
+            strokeLinecap="round"
+          />
+        </svg>
       </div>
     </section>
   );

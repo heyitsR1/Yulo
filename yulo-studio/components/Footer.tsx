@@ -1,58 +1,108 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { gsap } from "@/lib/gsap";
 import { siteContent } from "@/data/content";
 
 const { footer } = siteContent;
 
 export default function Footer() {
-  return (
-    <footer className="relative w-full h-[600px] md:h-[1200px] overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-bg-warm via-[#e8ddd0] to-[#d6cabb]" />
+  const rootRef = useRef<HTMLElement>(null);
 
-      <div className="relative z-10 flex flex-col justify-end h-full max-w-content mx-auto px-6 md:px-0 pb-6 md:pb-page-x">
-        {/* Tech list */}
-        <div className="flex justify-end mb-8 md:mb-[77px]">
-          <div className="flex flex-col items-end gap-6 md:gap-12">
-            <p className="text-peach text-xs md:text-[14.4px] font-normal leading-[14.4px] opacity-[0.54]">
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const ctx = gsap.context(() => {
+      // Curtain reveal: the footer content sits fixed-feel behind the page
+      gsap.fromTo(
+        ".footer-inner",
+        { yPercent: -28 },
+        {
+          yPercent: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: root,
+            start: "top bottom",
+            end: "bottom bottom",
+            scrub: true,
+          },
+        }
+      );
+
+      gsap.from(".footer-word", {
+        yPercent: 55,
+        ease: "none",
+        scrollTrigger: {
+          trigger: root,
+          start: "top 70%",
+          end: "bottom bottom",
+          scrub: 0.4,
+        },
+      });
+    }, root);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <footer
+      ref={rootRef}
+      data-nav-dark
+      className="relative -mt-[3vw] h-[92vh] w-full overflow-clip"
+    >
+      <div className="footer-inner absolute inset-0">
+        <div
+          className="grain absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${footer.scene})` }}
+        >
+          <div className="absolute inset-0 bg-[#1b120b]/55" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#f0bb96]/30 via-transparent to-transparent" />
+        </div>
+
+        <div
+          data-email-hover
+          className="relative z-10 flex h-full flex-col justify-end px-[4vw] pb-[3vh]"
+        >
+          <div className="absolute top-[24vh] right-[4vw] text-right">
+            <p className="text-[13px] font-medium text-peach/60">
               Website made using:
             </p>
-            <ul className="flex flex-col items-end gap-2 md:gap-4">
-              {footer.techList.map((tech) => (
+            <ul className="mt-[3vh] flex flex-col items-end gap-[1.1vh]">
+              {footer.madeUsing.map((tech) => (
                 <li
                   key={tech}
-                  className="text-peach text-xs md:text-[14px] font-bold leading-[14.4px]"
+                  className="text-[13.5px] font-semibold text-peach"
                 >
                   {tech}
                 </li>
               ))}
             </ul>
           </div>
-        </div>
 
-        {/* Large split branding */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-0 md:gap-[230px] mb-2 md:mb-[10px]">
-          <div className="md:w-[768px]">
-            <div className="overflow-hidden h-[80px] md:h-[245px] pt-1 md:pt-[14px]">
-              <span className="text-peach text-[100px] md:text-[200px] xl:text-[313.3px] font-bold leading-[0.78] tracking-[-4px] md:tracking-[-13.44px]">
-                {footer.brandLeft}
+          <div className="flex items-end justify-between">
+            <span className="overflow-hidden">
+              <span className="footer-word block text-[15vw] leading-[0.8] font-semibold tracking-[-0.05em] text-[#f0bb96]">
+                {footer.left.word}
               </span>
-            </div>
-          </div>
-          <div className="md:w-[768px] md:flex md:flex-col md:items-end">
-            <div className="overflow-hidden h-[80px] md:h-[245px] pt-1 md:pt-[26px]">
-              <span className="text-peach text-[100px] md:text-[200px] xl:text-[326.4px] font-bold leading-[0.75] tracking-[-4px] md:tracking-[-13.44px]">
-                {footer.brandRight}
+            </span>
+            <span className="overflow-hidden">
+              <span className="footer-word block text-[15vw] leading-[0.8] font-semibold tracking-[-0.05em] text-[#f0bb96]">
+                {footer.right.word}
               </span>
-            </div>
+            </span>
           </div>
-        </div>
 
-        {/* Subtitles */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
-          <span className="text-peach text-base md:text-[24.6px] font-bold leading-[25.6px] md:ml-[162px]">
-            {footer.subtitleLeft}
-          </span>
-          <span className="text-peach text-base md:text-[24.4px] font-bold leading-[25.6px]">
-            {footer.subtitleRight}
-          </span>
+          <div className="mt-[1.5vh] flex items-center justify-between">
+            <p className="text-[clamp(14px,1.35vw,21px)] font-semibold text-[#f0bb96]">
+              {footer.left.sub}{" "}
+              <span className="text-[#f0bb96]/50">{footer.left.year}</span>
+            </p>
+            <p className="text-[clamp(14px,1.35vw,21px)] font-semibold text-[#f0bb96]">
+              {footer.right.sub}{" "}
+              <span className="text-[#f0bb96]/50">{footer.right.tag}</span>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

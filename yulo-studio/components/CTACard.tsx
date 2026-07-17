@@ -1,44 +1,103 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { gsap, SplitText } from "@/lib/gsap";
 import { siteContent } from "@/data/content";
 
-const { cta } = siteContent;
+const { cta, email } = siteContent;
 
 export default function CTACard() {
+  const rootRef = useRef<HTMLElement>(null);
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const ctx = gsap.context(() => {
+      root.querySelectorAll(".cta-fill").forEach((el) => {
+        const split = new SplitText(el, { type: "words" });
+        gsap.fromTo(
+          split.words,
+          { opacity: 0.3 },
+          {
+            opacity: 1,
+            stagger: 0.08,
+            ease: "none",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 88%",
+              end: "top 45%",
+              scrub: true,
+            },
+          }
+        );
+      });
+
+      gsap.from(".cta-card", {
+        y: 60,
+        duration: 0.9,
+        ease: "power3.out",
+        scrollTrigger: { trigger: root, start: "top 80%" },
+      });
+    }, root);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="w-full bg-gray-mid py-10 md:py-[96px] px-4 md:px-0 flex items-center justify-center">
-      <div className="w-full max-w-content mx-auto rounded-[24px] md:rounded-card border border-peach overflow-hidden">
-        <div className="px-6 md:px-[96px] py-12 md:pt-[172px] md:pb-[172px]">
-          <h2 className="text-white text-[36px] md:text-[70px] xl:text-[110.8px] font-bold leading-[1.05] md:leading-[115.2px] tracking-[-2px] md:tracking-[-5.76px] whitespace-pre-line">
-            {cta.heading}
+    <section
+      ref={rootRef}
+      className="relative z-10 w-full rounded-b-[3vw] bg-[#a8a6a5] px-[4vw] py-[6vw]"
+    >
+      <div className="cta-card overflow-hidden rounded-[3vw] border border-peach/70">
+        <div className="px-[5vw] pt-[8vw] pb-[7vw]">
+          <h2 className="cta-fill max-w-[70vw] text-[7.2vw] leading-[1.02] font-semibold tracking-[-0.045em] text-white">
+            {cta.headline}
           </h2>
-          <p className="mt-4 md:mt-[19px] text-white text-base md:text-[27.3px] font-bold leading-[1.6] md:leading-[46px] tracking-[0.48px]">
-            {cta.subtitle}
+          <p className="cta-fill mt-[2.5vw] text-[1.8vw] font-semibold tracking-[0.01em] text-white/90">
+            {cta.sub}
           </p>
         </div>
 
         <a
-          href={cta.ctaHref}
-          className="bg-peach px-6 md:px-[96px] h-[100px] md:h-[269px] flex items-center justify-between"
+          href={`mailto:${email}`}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          className="relative flex h-[16.5vw] items-center justify-between bg-peach px-[5vw]"
         >
-          <div className="w-[50px] md:w-[115px] h-[50px] md:h-[115px] flex items-center justify-center">
-            <svg
-              width="68"
-              height="57"
-              viewBox="0 0 68 57"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-8 md:w-auto h-auto"
-            >
+          <span
+            className="flex h-[6vw] w-[6vw] items-center justify-center transition-transform duration-500"
+            style={{ transform: hovered ? "translateX(1vw)" : "none" }}
+          >
+            <svg viewBox="0 0 68 57" fill="none" className="h-auto w-[4.2vw]">
               <path
                 d="M1 28.5h62m0 0L40 4m23 24.5L40 53"
                 stroke="#96908C"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
-          </div>
-          <span className="text-blue text-[32px] md:text-[70px] xl:text-[109.8px] font-bold leading-none tracking-[-2px] md:tracking-[-5.76px]">
-            {cta.ctaText}
+          </span>
+
+          <span className="relative overflow-hidden text-right">
+            <span
+              className="block text-[7vw] leading-[1.05] font-semibold tracking-[-0.045em] text-blue transition-transform duration-500"
+              style={{
+                transform: hovered ? "translateY(-100%)" : "translateY(0)",
+              }}
+            >
+              {cta.action}
+            </span>
+            <span
+              className="absolute inset-0 flex items-center justify-end text-[3.4vw] font-semibold tracking-[-0.02em] text-blue transition-transform duration-500"
+              style={{
+                transform: hovered ? "translateY(0)" : "translateY(100%)",
+              }}
+            >
+              {email}
+            </span>
           </span>
         </a>
       </div>

@@ -1,21 +1,34 @@
 import type { Metadata } from "next";
+import { Figtree, Six_Caps, Shrikhand } from "next/font/google";
 import "./globals.css";
 
+const figtree = Figtree({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-figtree",
+});
+
+const sixCaps = Six_Caps({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-six-caps",
+});
+
+const shrikhand = Shrikhand({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-shrikhand",
+});
+
 export const metadata: Metadata = {
-  title: "Yulo Studio — Transforming Brands, Building Futures",
+  title: "Yulo Studio | Brand & Web Design Studio",
   description:
-    "A Nepal-based brand transformation studio working across strategy, design, and digital. We help companies succeed with websites, branding, and product design.",
-  keywords: [
-    "design studio",
-    "brand design",
-    "web design",
-    "Nepal",
-    "Yulo Studio",
-  ],
+    "Yulo Studio is a brand and web design studio crafting websites, visual identities, and digital products that make users click and scroll.",
+  keywords: ["design studio", "brand design", "web design", "Yulo Studio"],
   openGraph: {
-    title: "Yulo Studio — Transforming Brands, Building Futures",
+    title: "Yulo Studio | Brand & Web Design Studio",
     description:
-      "A Nepal-based brand transformation studio working across strategy, design, and digital.",
+      "A brand and web design studio crafting websites, visual identities, and digital products.",
     type: "website",
   },
 };
@@ -26,8 +39,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-bg-warm antialiased">{children}</body>
+    <html
+      lang="en"
+      className={`${figtree.variable} ${sixCaps.variable} ${shrikhand.variable}`}
+    >
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
