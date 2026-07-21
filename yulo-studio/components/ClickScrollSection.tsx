@@ -53,6 +53,18 @@ export default function ClickScrollSection() {
         scrollTrigger: { trigger: root, start: "top 55%" },
       });
 
+      // "ll" bars — dashed pattern flows downward as the page scrolls
+      gsap.to(".cs-scroll-bar", {
+        backgroundPositionY: "+=54vw",
+        ease: "none",
+        scrollTrigger: {
+          trigger: root,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+
       // Shape field parallax — each drifts upward at its own rate
       root.querySelectorAll<HTMLElement>("[data-speed]").forEach((el) => {
         const speed = Number(el.dataset.speed);
@@ -87,9 +99,9 @@ export default function ClickScrollSection() {
             </span>
             <span>{clickScroll.mid} </span>
             <span className="text-[#f5b48d]">{clickScroll.scroll}</span>
-            <span className="caret-blink ml-[1.2vw] inline-flex translate-y-[0.6vw] gap-[0.6vw]">
-              <span className="inline-block h-[6.2vw] w-[0.5vw] rounded-full bg-peach" />
-              <span className="inline-block h-[6.2vw] w-[0.5vw] rounded-full bg-peach" />
+            <span className="ml-[1.2vw] inline-flex translate-y-[0.6vw] gap-[0.6vw]">
+              <span className="cs-scroll-bar inline-block h-[6.2vw] w-[0.5vw] overflow-hidden rounded-full" />
+              <span className="cs-scroll-bar inline-block h-[6.2vw] w-[0.5vw] overflow-hidden rounded-full" />
             </span>
           </span>
           <span className="block">{clickScroll.line4}</span>

@@ -66,23 +66,16 @@ body {
   background-size: 180px 180px;
 }
 
-/* Blinking text-caret bars used beside the “scroll” word */
-@keyframes caret-blink {
-  0%,
-  45% {
-    opacity: 1;
-  }
-  50%,
-  95% {
-    opacity: 0.25;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.caret-blink {
-  animation: caret-blink 1.1s steps(1) infinite;
+/* "ll" bars beside the "scroll" word — dashes flow downward, scrubbed to scroll by ClickScrollSection */
+.cs-scroll-bar {
+  background-image: repeating-linear-gradient(
+    180deg,
+    var(--color-peach) 0,
+    var(--color-peach) 0.9vw,
+    transparent 0.9vw 1.8vw
+  );
+  background-size: 100% 1.8vw;
+  background-position-y: 0px;
 }
 
 /* Loader wordmark pulse */
