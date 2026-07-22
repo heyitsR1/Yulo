@@ -9,9 +9,6 @@ export const siteContent = {
     ],
     social: [
       { label: "Email", href: "mailto:hello@yulostudio.com" },
-      { label: "in", href: "https://linkedin.com" },
-      { label: "x", href: "https://x.com" },
-      { label: "Be", href: "https://behance.net" },
     ],
   },
   hero: {

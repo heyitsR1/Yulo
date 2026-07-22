@@ -1,8 +1,24 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
+import { projects } from "@/data/projects";
+
+/**
+ * Cards are keyed off the image path (`/images/work/<folder>/…`), which mostly
+ * matches the project slug — `whop` is the one that doesn't.
+ */
+const FOLDER_TO_SLUG: Record<string, string> = {
+  whop: "whop-video-downloader",
+};
+
+function projectForImage(src: string) {
+  const folder = src.split("/")[3] ?? "";
+  const slug = FOLDER_TO_SLUG[folder] ?? folder;
+  return projects.find((p) => p.slug === slug);
+}
 
 interface TitleSegment {
   text: string;
@@ -135,25 +151,60 @@ export default function ServiceBlock({
           className="svc-strip mt-[5vw] w-full px-[4vw]"
           style={{ perspective: "1600px" }}
         >
-          <div className="flex w-full gap-[0.9vw]">
-            {images.map((src, i) => (
-              <div
-                key={i}
-                className="svc-card relative aspect-[5/4] flex-1 overflow-hidden rounded-[6px] bg-[#d4cfc9] will-change-transform"
-                style={{
-                  transformStyle: "preserve-3d",
-                  transformOrigin: "center bottom",
-                }}
-              >
-                <Image
-                  src={src}
-                  alt="Selected project"
-                  fill
-                  sizes="20vw"
-                  className="object-cover"
-                />
-              </div>
-            ))}
+          {/* Below md the five-up row squeezes each card to nothing, so it
+              becomes a snap-scrolling rail instead. */}
+          <div className="-mx-[4vw] flex snap-x snap-mandatory gap-[3vw] overflow-x-auto px-[4vw] pb-4 md:mx-0 md:snap-none md:gap-[0.9vw] md:overflow-visible md:px-0 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {images.map((src, i) => {
+              const project = projectForImage(src);
+              // The scroll tween writes an inline transform on .svc-card, so
+              // hover lift lives on the inner element to avoid fighting it.
+              const inner = (
+                <>
+                  <Image
+                    src={src}
+                    alt={project ? `${project.name} — ${project.tagline}` : ""}
+                    fill
+                    sizes="(max-width: 768px) 68vw, 20vw"
+                    className="object-cover transition-transform duration-500 ease-out group-hover/card:scale-[1.06]"
+                  />
+                  {project && (
+                    <>
+                      <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 transition-opacity duration-400 group-hover/card:opacity-100" />
+                      <span className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 p-[1vw] text-left text-[clamp(11px,1vw,15px)] leading-tight font-semibold text-white opacity-0 transition-all duration-400 group-hover/card:translate-y-0 group-hover/card:opacity-100">
+                        {project.name}
+                        <span className="ml-[0.4em] opacity-70">↗</span>
+                      </span>
+                    </>
+                  )}
+                </>
+              );
+
+              const innerCls =
+                "group/card relative block aspect-[5/4] h-full w-full overflow-hidden rounded-[6px] bg-[#d4cfc9] transition-[transform,box-shadow] duration-500 ease-out";
+
+              return (
+                <div
+                  key={i}
+                  className="svc-card w-[68vw] shrink-0 snap-center will-change-transform md:w-auto md:flex-1 md:shrink"
+                  style={{
+                    transformStyle: "preserve-3d",
+                    transformOrigin: "center bottom",
+                  }}
+                >
+                  {project ? (
+                    <Link
+                      href={`/work/${project.slug}`}
+                      aria-label={`View case study: ${project.name}`}
+                      className={`${innerCls} cursor-pointer hover:-translate-y-[0.9vw] hover:shadow-[0_1.4vw_3vw_rgba(60,50,40,0.22)] focus-visible:-translate-y-[0.9vw] focus-visible:ring-2 focus-visible:ring-blue focus-visible:outline-none`}
+                    >
+                      {inner}
+                    </Link>
+                  ) : (
+                    <div className={innerCls}>{inner}</div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

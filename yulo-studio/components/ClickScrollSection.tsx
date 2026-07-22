@@ -31,6 +31,13 @@ const ACCENTS = [
 ];
 
 /**
+ * The drawn thread that ran from the "ll" of "scroll" down through the shape
+ * field read as visual noise, so it's switched off. Everything below is kept
+ * intact behind this flag in case we want to revisit the idea.
+ */
+const ENABLE_NOODLE = false;
+
+/**
  * A loose, hand-drawn-feeling lasso loop around (cx, cy): ~300° of an arc
  * (not a closed circle, so it reads as "wrapped around" rather than a
  * perfect ring) starting up-left of the ball and exiting down-left of it,
@@ -78,7 +85,9 @@ export default function ClickScrollSection() {
       const lastBar = lastBarRef.current;
       let buildPath: (() => void) | null = null;
 
-      if (svg && path && lastBar) {
+      // Thread/noodle disabled — the drawn line read as visual noise.
+      // Kept in place (behind `false`) in case we want to revisit it.
+      if (ENABLE_NOODLE && svg && path && lastBar) {
         buildPath = () => {
           const rootRect = root.getBoundingClientRect();
           const toLocal = (r: DOMRect) => ({
@@ -311,21 +320,23 @@ export default function ClickScrollSection() {
         ))}
       </div>
 
-      {/* Thread — the "ll" from "scroll" extends down and loops around the small balls */}
-      <svg
-        ref={noodleSvgRef}
-        className="pointer-events-none absolute left-0 top-0 w-full"
-        preserveAspectRatio="none"
-      >
-        <path
-          ref={noodlePathRef}
-          d=""
-          fill="none"
-          stroke="#f99e76"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      {/* Thread (disabled — see ENABLE_NOODLE) */}
+      {ENABLE_NOODLE && (
+        <svg
+          ref={noodleSvgRef}
+          className="pointer-events-none absolute top-0 left-0 w-full"
+          preserveAspectRatio="none"
+        >
+          <path
+            ref={noodlePathRef}
+            d=""
+            fill="none"
+            stroke="#f99e76"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
     </section>
   );
 }
