@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { gsap, SplitText } from "@/lib/gsap";
+import { gsap, SplitText, ScrollTrigger } from "@/lib/gsap";
 import { siteContent } from "@/data/content";
 
 const { clickScroll } = siteContent;
@@ -17,23 +17,136 @@ const SHAPES = [
   { src: "/images/shapes/big-square-scroll1.png", cls: "left-[18.5vw] top-[35vw] w-[19vw]", speed: -11, rot: 0 },
 ];
 
+// Only the small round accents get looped by the thread — the big blurry
+// blobs are just background the line drifts past, like the reference.
 const ACCENTS = [
-  { cls: "left-[60.5vw] top-[13vw] h-[2.7vw] w-[4.7vw] rounded-full", speed: -15 },
-  { cls: "left-[20vw] top-[31.5vw] h-[3vw] w-[3vw] rounded-full", speed: -8 },
+  { posCls: "left-[60.5vw] top-[13vw] h-[2.7vw] w-[4.7vw]", shapeCls: "rounded-full bg-blue", speed: -15, ball: true },
+  { posCls: "left-[20vw] top-[31.5vw] h-[3vw] w-[3vw]", shapeCls: "rounded-full bg-blue", speed: -8, ball: true },
   {
-    cls: "left-[69vw] top-[42vw] h-[2.4vw] w-[2.4vw] [clip-path:polygon(50%_0,100%_38%,82%_100%,18%_100%,0_38%)]",
+    posCls: "left-[69vw] top-[42vw] h-[2.4vw] w-[2.4vw]",
+    shapeCls: "bg-blue [clip-path:polygon(50%_0,100%_38%,82%_100%,18%_100%,0_38%)]",
     speed: -18,
+    ball: false,
   },
 ];
 
+/**
+ * A loose, hand-drawn-feeling lasso loop around (cx, cy): ~300° of an arc
+ * (not a closed circle, so it reads as "wrapped around" rather than a
+ * perfect ring) starting up-left of the ball and exiting down-left of it,
+ * ready to continue toward the next point.
+ */
+function lassoLoop(cx: number, cy: number, r: number) {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const pt = (deg: number) => ({ x: cx + r * Math.cos(toRad(deg)), y: cy + r * Math.sin(toRad(deg)) });
+  const startDeg = 205;
+  const sweepDeg = 300;
+  const start = pt(startDeg);
+  const mid = pt(startDeg + sweepDeg / 2);
+  const end = pt(startDeg + sweepDeg);
+  return {
+    start,
+    end,
+    d: `A ${r} ${r} 0 0 1 ${mid.x} ${mid.y} A ${r} ${r} 0 0 1 ${end.x} ${end.y} `,
+  };
+}
+
 export default function ClickScrollSection() {
   const rootRef = useRef<HTMLElement>(null);
+  const shapesRef = useRef<HTMLDivElement>(null);
+  const lastBarRef = useRef<HTMLSpanElement>(null);
+  const shapeElRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const accentElRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const noodleSvgRef = useRef<SVGSVGElement>(null);
+  const noodlePathRef = useRef<SVGPathElement>(null);
 
   useEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
+    const shapesEl = shapesRef.current;
+    if (!root || !shapesEl) return;
+
+    let cleanupNoodle: (() => void) | undefined;
 
     const ctx = gsap.context(() => {
+      // The noodle path-builder is defined up front so the heading entrance
+      // tween (below) can trigger a rebuild once it settles — the "ll" bars
+      // sit inside a split line that animates in with a translateY, and
+      // getBoundingClientRect includes that transform, so measuring too
+      // early anchors the thread to the bars' pre-animation position.
+      const svg = noodleSvgRef.current;
+      const path = noodlePathRef.current;
+      const lastBar = lastBarRef.current;
+      let buildPath: (() => void) | null = null;
+
+      if (svg && path && lastBar) {
+        buildPath = () => {
+          const rootRect = root.getBoundingClientRect();
+          const toLocal = (r: DOMRect) => ({
+            x: r.left + r.width / 2 - rootRect.left,
+            y: r.top + r.height / 2 - rootRect.top,
+          });
+
+          const barRect = lastBar.getBoundingClientRect();
+          const start = {
+            x: barRect.left + barRect.width / 2 - rootRect.left,
+            y: barRect.bottom - rootRect.top,
+          };
+
+          const ballPoints: { x: number; y: number; r: number }[] = [];
+          accentElRefs.current.forEach((el, i) => {
+            if (!el || !ACCENTS[i].ball) return;
+            const r = el.getBoundingClientRect();
+            const c = toLocal(r);
+            // loosely orbits the ball rather than hugging it
+            ballPoints.push({ x: c.x, y: c.y, r: (Math.min(r.width, r.height) / 2) * 1.9 });
+          });
+          ballPoints.sort((a, b) => a.y - b.y);
+
+          let d = `M ${start.x} ${start.y} `;
+          let cursor = start;
+          ballPoints.forEach((p, i) => {
+            const loop = lassoLoop(p.x, p.y, p.r);
+            // a lightly wavy approach into the loop, not a straight line
+            const bow = i % 2 === 0 ? 1 : -1;
+            const c1 = { x: cursor.x + (loop.start.x - cursor.x) * 0.35 + bow * 18, y: cursor.y + (loop.start.y - cursor.y) * 0.3 };
+            const c2 = { x: cursor.x + (loop.start.x - cursor.x) * 0.7 - bow * 12, y: cursor.y + (loop.start.y - cursor.y) * 0.75 };
+            d += `C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${loop.start.x} ${loop.start.y} `;
+            d += loop.d;
+            cursor = loop.end;
+          });
+          // tail off past the last ball
+          const tail = { x: cursor.x - 30, y: cursor.y + 110 };
+          d += `C ${cursor.x} ${cursor.y + 40}, ${tail.x} ${tail.y - 50}, ${tail.x} ${tail.y} `;
+
+          path.setAttribute("d", d);
+
+          const shapesRect = shapesEl.getBoundingClientRect();
+          const height = shapesRect.bottom - rootRect.top + 100;
+          svg.setAttribute("viewBox", `0 0 ${rootRect.width} ${height}`);
+          svg.style.height = `${height}px`;
+
+          const strokeWidth = Math.max(2.5, window.innerWidth * 0.0042);
+          path.setAttribute("stroke-width", String(strokeWidth));
+
+          const len = path.getTotalLength();
+          gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
+
+          ScrollTrigger.getById("noodle")?.kill();
+          gsap.to(path, {
+            strokeDashoffset: 0,
+            ease: "none",
+            scrollTrigger: {
+              id: "noodle",
+              trigger: root,
+              start: "top 60%",
+              end: "bottom bottom",
+              scrub: 0.6,
+            },
+          });
+          ScrollTrigger.refresh();
+        };
+      }
+
       // Heading lines rise in as the section enters
       const split = new SplitText(".cs-heading", { type: "lines" });
       gsap.from(split.lines, {
@@ -43,6 +156,7 @@ export default function ClickScrollSection() {
         duration: 0.9,
         ease: "power3.out",
         scrollTrigger: { trigger: root, start: "top 65%" },
+        onComplete: () => buildPath?.(),
       });
 
       gsap.from(".cs-pill", {
@@ -65,23 +179,75 @@ export default function ClickScrollSection() {
         },
       });
 
-      // Shape field parallax — each drifts upward at its own rate
+      // Shape field — continuous parallax drift
       root.querySelectorAll<HTMLElement>("[data-speed]").forEach((el) => {
         const speed = Number(el.dataset.speed);
         gsap.to(el, {
           y: `${speed}vw`,
           ease: "none",
           scrollTrigger: {
-            trigger: ".cs-shapes",
+            trigger: shapesEl,
             start: "top bottom",
             end: "bottom top",
             scrub: true,
           },
         });
       });
+
+      // Gravity fall — each shape drops in and settles with a bounce as it
+      // enters view, independent of the parallax drift above (separate inner
+      // element so the two transforms don't stomp on each other).
+      gsap.utils.toArray<HTMLElement>(".cs-shape-inner").forEach((inner, i) => {
+        gsap.from(inner, {
+          y: -70 - (i % 3) * 20,
+          opacity: 0,
+          duration: 1,
+          ease: "bounce.out",
+          scrollTrigger: {
+            trigger: inner,
+            start: "top 90%",
+            toggleActions: "play none none reverse",
+          },
+        });
+      });
+
+      // Subtle tumble while falling/drifting, for physicality
+      shapeElRefs.current.forEach((el, i) => {
+        if (!el) return;
+        gsap.to(el, {
+          rotate: i % 2 === 0 ? 10 : -10,
+          ease: "none",
+          scrollTrigger: {
+            trigger: shapesEl,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      });
+
+      if (buildPath) {
+        const build = buildPath;
+        // Build once layout has settled (works even in a backgrounded tab,
+        // unlike requestAnimationFrame which browsers can suspend entirely),
+        // and again once the heading's entrance transform completes (above).
+        build();
+        const t1 = setTimeout(build, 300);
+        const t2 = setTimeout(build, 1200);
+        document.fonts?.ready?.then(build);
+        window.addEventListener("resize", build);
+        cleanupNoodle = () => {
+          clearTimeout(t1);
+          clearTimeout(t2);
+          window.removeEventListener("resize", build);
+        };
+      }
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      cleanupNoodle?.();
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -101,7 +267,7 @@ export default function ClickScrollSection() {
             <span className="text-[#f5b48d]">{clickScroll.scroll}</span>
             <span className="ml-[1.2vw] inline-flex translate-y-[0.6vw] gap-[0.6vw]">
               <span className="cs-scroll-bar inline-block h-[6.2vw] w-[0.5vw] overflow-hidden rounded-full" />
-              <span className="cs-scroll-bar inline-block h-[6.2vw] w-[0.5vw] overflow-hidden rounded-full" />
+              <span ref={lastBarRef} className="cs-scroll-bar inline-block h-[6.2vw] w-[0.5vw] overflow-hidden rounded-full" />
             </span>
           </span>
           <span className="block">{clickScroll.line4}</span>
@@ -109,46 +275,57 @@ export default function ClickScrollSection() {
       </div>
 
       {/* Floating 3D shape field */}
-      <div className="cs-shapes relative h-[58vw] w-full">
-        {SHAPES.map((s) => (
+      <div ref={shapesRef} className="cs-shapes relative h-[58vw] w-full">
+        {SHAPES.map((s, i) => (
           <div
             key={s.src}
+            ref={(el) => {
+              shapeElRefs.current[i] = el;
+            }}
             data-speed={s.speed}
             className={`absolute ${s.cls}`}
             style={{ rotate: `${s.rot}deg` }}
           >
-            <Image
-              src={s.src}
-              alt=""
-              width={900}
-              height={900}
-              className="h-auto w-full object-contain"
-            />
+            <div className="cs-shape-inner">
+              <Image
+                src={s.src}
+                alt=""
+                width={900}
+                height={900}
+                className="h-auto w-full object-contain"
+              />
+            </div>
           </div>
         ))}
         {ACCENTS.map((a, i) => (
           <div
             key={i}
+            ref={(el) => {
+              accentElRefs.current[i] = el;
+            }}
             data-speed={a.speed}
-            className={`absolute bg-blue ${a.cls}`}
-          />
+            className={`absolute ${a.posCls}`}
+          >
+            <div className={`cs-shape-inner h-full w-full ${a.shapeCls}`} />
+          </div>
         ))}
-
-        {/* Cream rope curve weaving through the field */}
-        <svg
-          data-speed={-12}
-          className="absolute left-[55vw] top-[-4vw] h-[52vw] w-[26vw]"
-          viewBox="0 0 400 800"
-          fill="none"
-        >
-          <path
-            d="M300 -40 C 420 160, 180 300, 240 460 C 285 580, 180 660, 120 700"
-            stroke="#f5e9dc"
-            strokeWidth="14"
-            strokeLinecap="round"
-          />
-        </svg>
       </div>
+
+      {/* Thread — the "ll" from "scroll" extends down and loops around the small balls */}
+      <svg
+        ref={noodleSvgRef}
+        className="pointer-events-none absolute left-0 top-0 w-full"
+        preserveAspectRatio="none"
+      >
+        <path
+          ref={noodlePathRef}
+          d=""
+          fill="none"
+          stroke="#f99e76"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     </section>
   );
 }

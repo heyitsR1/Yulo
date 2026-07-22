@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { gsap, SplitText } from "@/lib/gsap";
 import { siteContent } from "@/data/content";
 
@@ -177,8 +178,8 @@ export default function AboutSection() {
           ))}
         </ul>
 
-        <a
-          href="#"
+        <Link
+          href={about.ctaHref}
           className="about-cta group mt-[4vw] inline-flex items-center gap-[10px]"
         >
           <span className="rounded-full bg-[rgba(120,114,108,0.55)] px-[22px] py-[14px] text-[14px] font-semibold text-white/90 backdrop-blur-sm transition-colors duration-300 group-hover:bg-[rgba(90,84,78,0.7)]">
@@ -195,7 +196,7 @@ export default function AboutSection() {
               />
             </svg>
           </span>
-        </a>
+        </Link>
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { siteContent } from "@/data/content";
 
@@ -70,29 +71,29 @@ export default function Navbar() {
       ref={ref}
       className="group/nav fixed top-0 right-0 left-0 z-[100] flex items-center justify-between px-[2.6vw] py-[22px]"
     >
-      <a
-        href="#top"
+      <Link
+        href="/"
         className="flex items-center gap-[5px] text-[17px] font-semibold tracking-[-0.02em] text-grey transition-colors duration-500 [.nav-on-dark_&]:text-peach"
       >
         {nav.brand.name}
         <span className="h-[5px] w-[5px] rounded-full bg-blue" />
         {nav.brand.suffix}
-      </a>
+      </Link>
 
       <div className="absolute left-1/2 flex -translate-x-1/2 items-center">
-        <a
+        <Link
           href={nav.links[0].href}
           className="rounded-full bg-[rgba(120,114,108,0.28)] px-[18px] py-[13px] text-[14px] leading-none font-semibold text-white/90 backdrop-blur-[6px] transition-all duration-300 hover:bg-[rgba(80,76,70,0.45)]"
         >
           {nav.links[0].label}
-        </a>
+        </Link>
         <LogoTile />
-        <a
+        <Link
           href={nav.links[1].href}
           className="rounded-full bg-[rgba(120,114,108,0.28)] px-[18px] py-[13px] text-[14px] leading-none font-semibold text-white/90 backdrop-blur-[6px] transition-all duration-300 hover:bg-[rgba(80,76,70,0.45)]"
         >
           {nav.links[1].label}
-        </a>
+        </Link>
       </div>
 
       <div className="hidden items-center gap-[6px] md:flex">

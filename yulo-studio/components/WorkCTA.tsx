@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { gsap, SplitText } from "@/lib/gsap";
 import { siteContent } from "@/data/content";
@@ -8,9 +9,9 @@ import { siteContent } from "@/data/content";
 const { workCta } = siteContent;
 
 const PAPERS = [
-  "/images/services/web-1.jpg",
-  "/images/services/brand-3.jpg",
-  "/images/services/product-1.jpg",
+  "/images/work/markee/hero.jpg",
+  "/images/work/hithx/hero.jpg",
+  "/images/work/tailsgate/hero.jpg",
 ];
 
 export default function WorkCTA() {
@@ -103,10 +104,10 @@ export default function WorkCTA() {
         {workCta.pre}
       </p>
 
-      <a
-        href="#"
+      <Link
+        href={workCta.href}
         className="work-folder relative z-10 mt-[3.5vw] block w-[24vw] max-w-[460px] min-w-[240px]"
-        aria-label="Portfolio folder"
+        aria-label="Open our work"
       >
         {/* folder back */}
         <div className="relative">
@@ -147,7 +148,7 @@ export default function WorkCTA() {
             />
           </div>
         </div>
-      </a>
+      </Link>
 
       <p className="work-fill relative z-10 mt-[3.5vw] text-[clamp(13px,1.1vw,17px)] font-semibold tracking-[0.02em] text-grey">
         {workCta.post}
