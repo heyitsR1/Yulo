@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Markee mascot favicon — starburst from brand/index.html on the stage color -->
+  <rect width="100" height="100" rx="22" fill="#14100B"/>
+  <g transform="translate(50 50) scale(0.82) translate(-50 -50)">
+    <polygon
+      points="50.00,4.00 59.23,24.63 79.57,14.76 73.38,36.50 95.30,42.01 76.59,54.69 89.84,73.00 67.36,70.68 65.73,93.23 50.00,77.00 34.27,93.23 32.64,70.68 10.16,73.00 23.41,54.69 4.70,42.01 26.62,36.50 20.43,14.76 40.77,24.63"
+      fill="#FFB84D" stroke="#FFB84D" stroke-width="6" stroke-linejoin="round"/>
+    <circle cx="41" cy="47" r="4.5" fill="#14100B"/>
+    <circle cx="59" cy="47" r="4.5" fill="#14100B"/>
+    <path d="M42 58 Q50 65 58 58" fill="none" stroke="#14100B" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="80.5" cy="13.5" r="7" fill="#FFE3A3"/>
+  </g>
+</svg>

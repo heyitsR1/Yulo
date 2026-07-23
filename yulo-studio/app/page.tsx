@@ -3,7 +3,7 @@ import Preloader from "@/components/Preloader";
 import SmoothScroll from "@/components/SmoothScroll";
 import EmailChip from "@/components/EmailChip";
 import HeroSection from "@/components/HeroSection";
-import ClickScrollSection from "@/components/ClickScrollSection";
+import StatementSection from "@/components/StatementSection";
 import ServicesSection from "@/components/ServicesSection";
 import WorkCTA from "@/components/WorkCTA";
 import AboutSection from "@/components/AboutSection";
@@ -18,7 +18,7 @@ export default function Home() {
       <EmailChip />
       <Navbar />
       <HeroSection />
-      <ClickScrollSection />
+      <StatementSection />
       <ServicesSection />
       <WorkCTA />
       <AboutSection />

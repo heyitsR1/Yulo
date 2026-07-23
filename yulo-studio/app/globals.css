@@ -66,16 +66,21 @@ body {
   background-size: 180px 180px;
 }
 
-/* "ll" bars beside the "scroll" word — dashes flow downward, scrubbed to scroll by ClickScrollSection */
-.cs-scroll-bar {
-  background-image: repeating-linear-gradient(
-    180deg,
-    var(--color-peach) 0,
-    var(--color-peach) 0.9vw,
-    transparent 0.9vw 1.8vw
-  );
-  background-size: 100% 1.8vw;
-  background-position-y: 0px;
+/* Stack ticker under the statement — two identical tracks scrolling as one */
+@keyframes st-ticker-slide {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.st-ticker {
+  animation: st-ticker-slide 34s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-ticker {
+    animation: none;
+  }
 }
 
 /* Loader wordmark pulse */

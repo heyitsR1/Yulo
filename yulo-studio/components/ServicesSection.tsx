@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { siteContent } from "@/data/content";
-import ServiceBlock from "./ServiceBlock";
+import SoftwareShowcase from "./SoftwareShowcase";
+import GrowthBlock from "./GrowthBlock";
 
 const { services } = siteContent;
 
@@ -45,10 +46,9 @@ export default function ServicesSection() {
         </h2>
       </div>
 
-      <div className="mt-[18vw] flex flex-col gap-[6vw]">
-        {services.items.map((service, i) => (
-          <ServiceBlock key={i} index={i} {...service} />
-        ))}
+      <div className="mt-[9vw] flex flex-col gap-[12vw] pb-[4vw]">
+        <SoftwareShowcase />
+        <GrowthBlock />
       </div>
     </section>
   );
